@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>每日五词 · 互联网 / 日常 / 考研</title>
+<title>每日五词 · 多词书背单词</title>
 <style>
   :root{
     --bg:#eef1f7;
@@ -42,19 +42,23 @@
   .date b{ color:var(--brand); font-weight:600; }
 
   /* ---------- tabs ---------- */
-  .tabs{ display:flex; gap:8px; background:#fff; padding:6px; border-radius:14px; box-shadow:var(--shadow); margin-bottom:14px; overflow-x:auto; }
+  .tabs{ display:flex; gap:6px; background:#fff; padding:6px; border-radius:14px; box-shadow:var(--shadow); margin-bottom:14px; overflow-x:auto; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar{ display:none; }
   .tab{
-    flex:1; min-width:78px; border:0; background:transparent; cursor:pointer;
-    padding:9px 10px; border-radius:10px; font-size:14px; font-weight:600; color:var(--ink-2);
+    flex:0 0 auto; border:0; background:transparent; cursor:pointer;
+    padding:9px 14px; border-radius:10px; font-size:14px; font-weight:600; color:var(--ink-2);
     font-family:inherit; transition:.18s; white-space:nowrap;
   }
   .tab:hover{ background:#f4f6fb; color:var(--ink); }
   .tab.on{ background:var(--brand); color:#fff; box-shadow:0 4px 12px rgba(79,70,229,.28); }
+  .tab .n{ font-size:11px; opacity:.6; margin-left:4px; font-weight:500; }
+  .tab.on .n{ opacity:.8; }
 
   /* ---------- progress ---------- */
   .bar{ background:#fff; border-radius:14px; padding:13px 16px; box-shadow:var(--shadow); margin-bottom:16px; }
-  .bar-top{ display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--ink-2); margin-bottom:9px; }
+  .bar-top{ display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--ink-2); margin-bottom:9px; gap:10px; }
   .bar-top b{ color:var(--ink); font-size:15px; }
+  .bar-top .l{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .track{ height:7px; background:#eef1f7; border-radius:99px; overflow:hidden; }
   .fill{ height:100%; width:0; border-radius:99px; background:linear-gradient(90deg,#6366f1,#4f46e5); transition:width .4s ease; }
 
@@ -74,16 +78,13 @@
   .back{ transform:rotateY(180deg); justify-content:center; }
   .cat{
     position:absolute; top:16px; left:18px; font-size:11px; font-weight:700; letter-spacing:.6px;
-    padding:4px 10px; border-radius:99px;
+    padding:4px 10px; border-radius:99px; background:var(--brand-soft); color:var(--brand);
   }
-  .cat.tech{ background:#eef0ff; color:#4f46e5; }
-  .cat.daily{ background:#e2f6fb; color:#0e7490; }
-  .cat.kaoyan{ background:#fdeee5; color:#c2410c; }
   .star{ position:absolute; top:12px; right:14px; border:0; background:transparent; font-size:19px; cursor:pointer; padding:4px; line-height:1; filter:grayscale(1); opacity:.4; transition:.18s; }
   .star:hover{ opacity:.8; }
   .star.on{ filter:none; opacity:1; }
 
-  .word{ font-size:clamp(38px,9vw,58px); font-weight:700; letter-spacing:-.5px; line-height:1.12; word-break:break-word; }
+  .word{ font-size:clamp(34px,8.4vw,54px); font-weight:700; letter-spacing:-.5px; line-height:1.14; word-break:break-word; }
   .phon-row{ display:flex; align-items:center; gap:9px; margin-top:14px; flex-wrap:wrap; justify-content:center; }
   .ipa{ font-size:16px; color:var(--ink-2); font-family:"Times New Roman",Georgia,serif; letter-spacing:.3px; }
   .spk{
@@ -96,7 +97,7 @@
   .hint{ margin-top:26px; font-size:12.5px; color:var(--ink-3); }
   .hint kbd{ background:#f1f4f9; border:1px solid var(--line); border-bottom-width:2px; border-radius:5px; padding:1px 5px; font-family:inherit; font-size:11px; }
 
-  .back .word{ font-size:clamp(26px,6.4vw,36px); }
+  .back .word{ font-size:clamp(24px,5.8vw,34px); }
   .pos-line{ margin-top:14px; font-size:17px; font-weight:600; color:var(--brand); }
   .pos-line .t{ font-style:italic; color:var(--ink-2); font-weight:600; margin-right:8px; font-size:15px; }
   .eg{ margin-top:20px; padding-top:18px; border-top:1px dashed var(--line); width:100%; }
@@ -118,7 +119,7 @@
   .btn.ghost:hover{ color:var(--brand); }
   .btn[disabled]{ opacity:.45; cursor:not-allowed; }
 
-  /* ---------- done / empty ---------- */
+  /* ---------- done / empty / loading ---------- */
   .panel{ background:#fff; border-radius:22px; box-shadow:var(--shadow); padding:34px 26px; text-align:center; }
   .panel .big{ font-size:44px; line-height:1; margin-bottom:14px; }
   .panel h2{ margin:0 0 8px; font-size:21px; }
@@ -127,12 +128,15 @@
   .rv{ display:flex; align-items:center; gap:10px; padding:11px 14px; border-radius:12px; background:#f8fafc; border:1px solid var(--line); }
   .rv.bad{ background:var(--warn-soft); border-color:#f5e3c6; }
   .rv .w{ font-weight:700; font-size:15.5px; }
-  .rv .m{ color:var(--ink-2); font-size:13px; flex:1; }
-  .rv .tag{ font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; background:#e6f7f1; color:var(--ok); }
+  .rv .m{ color:var(--ink-2); font-size:13px; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .rv .tag{ font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px; background:#e6f7f1; color:var(--ok); white-space:nowrap; }
   .rv.bad .tag{ background:#fbe6c8; color:var(--warn); }
   .panel .actions{ margin-top:22px; }
 
-  /* ---------- footer / stats ---------- */
+  .spin{ width:26px; height:26px; border:3px solid #e6eaf3; border-top-color:var(--brand); border-radius:50%; margin:0 auto 16px; animation:sp .8s linear infinite; }
+  @keyframes sp{ to{ transform:rotate(360deg); } }
+
+  /* ---------- footer ---------- */
   footer{ margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; }
   .chip{ background:#fff; border-radius:12px; padding:11px 15px; box-shadow:var(--shadow); font-size:12.5px; color:var(--ink-2); flex:1; min-width:104px; }
   .chip b{ display:block; font-size:19px; color:var(--ink); margin-bottom:2px; font-weight:700; }
@@ -141,7 +145,7 @@
   .mask{ position:fixed; inset:0; background:rgba(20,26,40,.42); backdrop-filter:blur(3px); display:none; z-index:40; }
   .mask.on{ display:block; }
   .drawer{
-    position:fixed; top:0; right:0; bottom:0; width:min(440px,92vw); background:#fff; z-index:41;
+    position:fixed; top:0; right:0; bottom:0; width:min(460px,92vw); background:#fff; z-index:41;
     box-shadow:-14px 0 40px rgba(20,26,40,.16); transform:translateX(102%); transition:transform .34s cubic-bezier(.3,.1,.2,1);
     display:flex; flex-direction:column;
   }
@@ -194,7 +198,10 @@
   <nav class="tabs" id="tabs"></nav>
 
   <div class="bar">
-    <div class="bar-top"><span>今日进度</span><span><b id="pNow">0</b> / <span id="pAll">5</span></span></div>
+    <div class="bar-top">
+      <span class="l" id="barLabel">今日进度</span>
+      <span><b id="pNow">0</b> / <span id="pAll">5</span></span>
+    </div>
     <div class="track"><div class="fill" id="pFill"></div></div>
   </div>
 
@@ -216,54 +223,37 @@
   </div>
   <div class="dr-body" id="drBody"></div>
   <div class="dr-foot">
-    <button class="btn ghost" id="drReset" style="flex:1">重置当前词库进度</button>
+    <button class="btn ghost" id="drReset" style="flex:1">重置当前词书进度</button>
   </div>
 </aside>
 
 <div class="toast" id="toast"></div>
 
-<script src="words.js"></script>
+<script src="books/meta.js"></script>
 <script>
 (function(){
   "use strict";
 
-  /* ============ 基础 ============ */
-  var MODES = [
-    { id:'tech',   name:'互联网' },
-    { id:'daily',  name:'日常'   },
-    { id:'kaoyan', name:'考研'   },
-    { id:'mix',    name:'混合'   }
-  ];
-  var CAT_NAME = { tech:'互联网', daily:'日常', kaoyan:'考研' };
   var PER_DAY = 5;
-  var KEY = 'word-daily-v1';
+  var KEY = 'word-daily-v2';
+  var META = window.BOOK_META || [];
+  var BOOKS = {};     // id -> [{w,p,t,m,e,z}]
+  var INDEX = {};     // "id::word" -> 词对象
+  var LOADING = {};
 
-  /* 给每个词打上类别标签 + 建索引 */
-  var INDEX = {};
-  ['tech','daily','kaoyan'].forEach(function(k){
-    (WORDS[k]||[]).forEach(function(o){ o.cat = k; INDEX[o.w] = o; });
-  });
-
-  /* ============ 存储 ============ */
   var S = {
-    mode:'tech',
-    learned:{},   // word -> 时间戳
-    mastered:{},  // word -> true
-    fav:{},       // word -> true
-    wrong:{},     // word -> true（不认识的词）
-    today:{},     // mode -> { date, ids:[], idx:0, res:{} }
-    streak:{ last:'', days:0 },
-    autoSpeak:false
+    book: (META[0] || {}).id || 'tech',
+    learned:{}, mastered:{}, fav:{}, wrong:{}, today:{}, streak:{ last:'', days:0 }
   };
+
   function load(){
     try{
       var raw = localStorage.getItem(KEY);
-      if(raw){ var o = JSON.parse(raw); Object.keys(S).forEach(function(k){ if(o[k]!==undefined) S[k]=o[k]; }); }
+      if(raw){ var o = JSON.parse(raw); Object.keys(S).forEach(function(kk){ if(o[kk]!==undefined) S[kk]=o[kk]; }); }
     }catch(e){}
   }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
-  /* ============ 工具 ============ */
   function todayStr(){
     var d = new Date();
     return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -287,25 +277,52 @@
     for(var i=a.length-1;i>0;i--){ var j = Math.floor(r()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
     return a;
   }
-  function poolOf(mode){
-    if(mode==='mix') return [].concat(WORDS.tech, WORDS.daily, WORDS.kaoyan);
-    return (WORDS[mode]||[]).slice();
-  }
-  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function $(id){ return document.getElementById(id); }
   var toastT;
   function toast(msg){
     var el = $('toast'); el.textContent = msg; el.classList.add('on');
     clearTimeout(toastT); toastT = setTimeout(function(){ el.classList.remove('on'); }, 1700);
   }
+  function metaOf(id){
+    for(var i=0;i<META.length;i++) if(META[i].id===id) return META[i];
+    return { id:id, name:id, count:0, desc:'' };
+  }
+  /* 进度键：同一单词可能出现在多本词书里，必须按词书隔离 */
+  function k(word){ return S.book + '::' + word; }
+
+  /* ============ 词书按需加载 ============ */
+  function loadBook(id, cb){
+    if(BOOKS[id]) return cb(true);
+    if(LOADING[id]){ LOADING[id].push(cb); return; }
+    LOADING[id] = [cb];
+    var s = document.createElement('script');
+    s.src = 'books/' + id + '.js';
+    s.onload = function(){
+      var raw = (window.BOOKS && window.BOOKS[id]) || [];
+      var list = raw.map(function(r){
+        return { w:r[0], p:r[1]||'', t:r[2]||'', m:r[3]||'', e:r[4]||'', z:r[5]||'', cat:id };
+      });
+      BOOKS[id] = list;
+      list.forEach(function(o){ INDEX[id+'::'+o.w] = o; });
+      var q = LOADING[id] || []; delete LOADING[id];
+      q.forEach(function(f){ try{ f(true); }catch(e){} });
+    };
+    s.onerror = function(){
+      var q = LOADING[id] || []; delete LOADING[id];
+      q.forEach(function(f){ try{ f(false); }catch(e){} });
+    };
+    document.head.appendChild(s);
+  }
 
   /* ============ 发音 ============ */
   var voices = [];
   function pickVoice(lang){
-    if(!voices.length) voices = window.speechSynthesis ? speechSynthesis.getVoices() : [];
-    var norm = function(s){ return (s||'').replace('_','-'); };
-    return voices.filter(function(v){ return norm(v.lang).toLowerCase() === lang.toLowerCase(); })[0]
-        || voices.filter(function(v){ return norm(v.lang).toLowerCase().indexOf(lang.slice(0,2).toLowerCase())===0; })[0]
+    if(!voices.length && window.speechSynthesis) voices = speechSynthesis.getVoices();
+    var norm = function(s){ return (s||'').replace('_','-').toLowerCase(); };
+    var l = lang.toLowerCase();
+    return voices.filter(function(v){ return norm(v.lang) === l; })[0]
+        || voices.filter(function(v){ return norm(v.lang).indexOf(l.slice(0,2))===0; })[0]
         || null;
   }
   if(window.speechSynthesis){
@@ -317,7 +334,7 @@
     if(!window.speechSynthesis){ toast('当前浏览器不支持语音朗读'); return; }
     speechSynthesis.cancel();
     var u = new SpeechSynthesisUtterance(text);
-    u.lang = lang; u.rate = 0.88; u.pitch = 1;
+    u.lang = lang; u.rate = 0.88;
     var v = pickVoice(lang);
     if(v) u.voice = v;
     speechSynthesis.speak(u);
@@ -325,49 +342,48 @@
 
   /* ============ 今日词 ============ */
   function ensureToday(){
-    var d = todayStr();
-    var t = S.today[S.mode];
+    var d = todayStr(), t = S.today[S.book];
     if(t && t.date === d && t.ids && t.ids.length) return t;
-
-    var order = shuffle(poolOf(S.mode).map(function(o){ return o.w; }), 'order::' + S.mode);
-    var avail = order.filter(function(w){ return !S.learned[w] && !S.mastered[w]; });
-    var ids = avail.slice(0, PER_DAY);
-    S.today[S.mode] = { date:d, ids:ids, idx:0, res:{} };
+    var list = BOOKS[S.book] || [];
+    var order = shuffle(list.map(function(o){ return o.w; }), 'order::' + S.book);
+    var avail = order.filter(function(w){ return !S.learned[k(w)] && !S.mastered[k(w)]; });
+    S.today[S.book] = { date:d, ids:avail.slice(0, PER_DAY), idx:0, res:{} };
     save();
-    return S.today[S.mode];
+    return S.today[S.book];
   }
-
-  /* 附加轮次：kind = 'review'（复习错词） / 'extra'（加背 5 个） */
   var RV = { ids:[], idx:0, res:{}, kind:'review' };
   function inReview(){ return RV.ids.length > 0; }
   function cur(){ return inReview() ? RV : ensureToday(); }
   function clearRV(){ RV = { ids:[], idx:0, res:{}, kind:'review' }; }
   function nextBatch(n){
-    var order = shuffle(poolOf(S.mode).map(function(o){ return o.w; }), 'order::'+S.mode);
-    return order.filter(function(w){ return !S.learned[w] && !S.mastered[w]; }).slice(0, n);
+    var list = BOOKS[S.book] || [];
+    var order = shuffle(list.map(function(o){ return o.w; }), 'order::' + S.book);
+    return order.filter(function(w){ return !S.learned[k(w)] && !S.mastered[k(w)]; }).slice(0, n);
   }
 
   /* ============ 渲染 ============ */
-  function renderDate(){
-    var d = new Date();
-    var wk = ['日','一','二','三','四','五','六'][d.getDay()];
-    var order = shuffle(poolOf(S.mode).map(function(o){ return o.w; }), 'order::'+S.mode);
-    var avail = order.filter(function(w){ return !S.learned[w] && !S.mastered[w]; });
-    var done = poolOf(S.mode).length - avail.length;
-    var dayNo = Math.max(1, Math.ceil(done / PER_DAY));
-    $('dateLine').innerHTML = (d.getMonth()+1)+'月'+d.getDate()+'日 周'+wk+' · 第 <b>'+dayNo+'</b> 天';
-  }
-
   function renderTabs(){
-    $('tabs').innerHTML = MODES.map(function(m){
-      return '<button class="tab'+(S.mode===m.id?' on':'')+'" data-mode="'+m.id+'">'+m.name+'</button>';
+    $('tabs').innerHTML = META.map(function(m){
+      return '<button class="tab'+(S.book===m.id?' on':'')+'" data-book="'+m.id+'">'+
+        esc(m.name)+'<span class="n">'+m.count+'</span></button>';
     }).join('');
     Array.prototype.forEach.call($('tabs').children, function(b){
       b.onclick = function(){
-        if(S.mode === b.dataset.mode) return;
-        S.mode = b.dataset.mode; clearRV(); save(); render();
+        if(S.book === b.dataset.book) return;
+        S.book = b.dataset.book; clearRV(); save(); render();
       };
     });
+  }
+
+  function renderDate(){
+    var d = new Date();
+    var wk = ['日','一','二','三','四','五','六'][d.getDay()];
+    var list = BOOKS[S.book] || [];
+    var order = shuffle(list.map(function(o){ return o.w; }), 'order::' + S.book);
+    var avail = order.filter(function(w){ return !S.learned[k(w)] && !S.mastered[k(w)]; });
+    var done = list.length - avail.length;
+    var dayNo = Math.max(1, Math.ceil(done / PER_DAY));
+    $('dateLine').innerHTML = (d.getMonth()+1)+'月'+d.getDate()+'日 周'+wk+' · 第 <b>'+dayNo+'</b> 天';
   }
 
   function renderProgress(){
@@ -376,44 +392,51 @@
     $('pNow').textContent = Math.min(c.idx, total);
     $('pAll').textContent = total;
     $('pFill').style.width = total ? Math.round(Math.min(c.idx,total)/total*100)+'%' : '0%';
+    var m = metaOf(S.book);
+    $('barLabel').textContent = inReview() ? ('复习 · ' + m.name) : ('今日进度 · ' + m.name + '（共 ' + m.count + ' 词）');
   }
 
   function renderStats(){
-    $('sLearned').textContent  = Object.keys(S.learned).length;
-    $('sMastered').textContent = Object.keys(S.mastered).length;
-    $('sStreak').textContent   = S.streak.days || 0;
-    $('sWrong').textContent    = Object.keys(S.wrong).length;
+    var nl = 0, nm = 0, nw = 0;
+    Object.keys(S.learned).forEach(function(x){ if(S.learned[x]) nl++; });
+    Object.keys(S.mastered).forEach(function(x){ if(S.mastered[x]) nm++; });
+    Object.keys(S.wrong).forEach(function(x){ if(S.wrong[x]) nw++; });
+    $('sLearned').textContent = nl;
+    $('sMastered').textContent = nm;
+    $('sStreak').textContent = S.streak.days || 0;
+    $('sWrong').textContent = nw;
   }
 
-  function catClass(c){ return c==='tech'?'tech':(c==='daily'?'daily':'kaoyan'); }
-
   function cardHTML(o, flipped){
-    var cat = CAT_NAME[o.cat] || '';
-    var star = S.fav[o.w] ? 'on' : '';
+    var m = metaOf(o.cat);
+    var star = S.fav[k(o.w)] ? 'on' : '';
+    var phon = o.p ? '<span class="ipa">'+esc(o.p)+'</span>' : '';
+    var eg = o.e
+      ? '<div class="eg"><div class="eg-en">'+esc(o.e)+'</div>'+(o.z?'<div class="eg-zh">'+esc(o.z)+'</div>':'')+'</div>'
+      : '';
+    var pos = (o.t ? '<span class="t">'+esc(o.t)+'</span>' : '');
     return '' +
     '<div class="wrap"><div class="card'+(flipped?' flip':'')+'" id="card">' +
       '<div class="face front">' +
-        '<span class="cat '+catClass(o.cat)+'">'+cat+'</span>' +
-        '<button class="star '+star+'" id="star" title="收藏">⭐</button>' +
+        '<span class="cat">'+esc(m.name)+'</span>' +
+        '<button class="star '+star+'" title="收藏">⭐</button>' +
         '<div class="word">'+esc(o.w)+'</div>' +
-        '<div class="phon-row">' +
-          '<span class="ipa">'+esc(o.p)+'</span>' +
+        '<div class="phon-row">' + phon +
           '<button class="spk" data-lang="en-US">🔊 US</button>' +
           '<button class="spk" data-lang="en-GB">🔊 UK</button>' +
         '</div>' +
         '<div class="hint">点击卡片 / 按 <kbd>空格</kbd> 查看释义</div>' +
       '</div>' +
       '<div class="face back">' +
-        '<span class="cat '+catClass(o.cat)+'">'+cat+'</span>' +
-        '<button class="star '+star+'" id="star2" title="收藏">⭐</button>' +
+        '<span class="cat">'+esc(m.name)+'</span>' +
+        '<button class="star '+star+'" title="收藏">⭐</button>' +
         '<div class="word">'+esc(o.w)+'</div>' +
-        '<div class="phon-row">' +
-          '<span class="ipa">'+esc(o.p)+'</span>' +
+        '<div class="phon-row">' + phon +
           '<button class="spk" data-lang="en-US">🔊 US</button>' +
           '<button class="spk" data-lang="en-GB">🔊 UK</button>' +
         '</div>' +
-        '<div class="pos-line"><span class="t">'+esc(o.t)+'</span>'+esc(o.m)+'</div>' +
-        '<div class="eg"><div class="eg-en">'+esc(o.e)+'</div><div class="eg-zh">'+esc(o.z)+'</div></div>' +
+        '<div class="pos-line">'+pos+esc(o.m)+'</div>' +
+        eg +
       '</div>' +
     '</div></div>' +
     '<div class="actions">' +
@@ -429,7 +452,7 @@
     var good = ids.length - bad.length;
     var isExtra = inReview() && RV.kind === 'extra';
     var rows = ids.map(function(w){
-      var o = INDEX[w] || { w:w, m:'', p:'' };
+      var o = INDEX[S.book+'::'+w] || { w:w, m:'' };
       var isBad = res[w] === 'no';
       return '<div class="rv'+(isBad?' bad':'')+'">' +
         '<button class="mini" data-say="'+esc(w)+'">🔊</button>' +
@@ -437,13 +460,11 @@
         '<span class="m">'+esc(o.m)+'</span>' +
         '<span class="tag">'+(isBad?'待复习':'已掌握')+'</span></div>';
     }).join('');
-
     var title = inReview() ? (isExtra ? '加背完成！' : '复习完成') : '今日完成！';
     var emoji = bad.length ? '💪' : (isExtra ? '🚀' : '🎉');
     var nextTip = inReview()
       ? (isExtra ? '又拿下了 5 个新词，进度已保存。' : '复习轮结束，今天的任务继续。')
       : '今天的 5 个词已经过完，明天会自动换新词。';
-
     var canExtra = nextBatch(PER_DAY).length > 0;
 
     $('main').innerHTML =
@@ -463,32 +484,40 @@
       b.onclick = function(){ speak(b.dataset.say, 'en-US'); };
     });
     var redo = $('btnRedo');
-    if(redo) redo.onclick = function(){
-      RV = { ids: bad.slice(), idx:0, res:{}, kind:'review' };
-      render();
-    };
+    if(redo) redo.onclick = function(){ RV = { ids: bad.slice(), idx:0, res:{}, kind:'review' }; render(); };
     var extra = $('btnExtra');
-    if(extra) extra.onclick = function(){
-      RV = { ids: nextBatch(PER_DAY), idx:0, res:{}, kind:'extra' };
-      render();
-    };
+    if(extra) extra.onclick = function(){ RV = { ids: nextBatch(PER_DAY), idx:0, res:{}, kind:'extra' }; render(); };
     $('btnNext').onclick = function(){ clearRV(); render(); openDrawer(); };
   }
 
   function renderEmpty(){
-    var nm = (MODES.filter(function(m){ return m.id===S.mode; })[0] || {}).name || '当前';
+    var m = metaOf(S.book);
     $('main').innerHTML =
       '<div class="panel">' +
         '<div class="big">🏆</div>' +
-        '<h2>「'+nm+'」词库已全部学完</h2>' +
-        '<p>当前模式下没有未学的单词了。可以在词表里复习，或者重置进度重新开始一轮。</p>' +
+        '<h2>「'+esc(m.name)+'」已全部学完</h2>' +
+        '<p>这本词书没有未学的单词了。可以在词表里复习，或重置进度重新开始。</p>' +
         '<div class="actions">' +
           '<button class="btn again" id="btnOpen">📚 打开词表</button>' +
           '<button class="btn got" id="btnReset">↺ 重置进度</button>' +
         '</div>' +
       '</div>';
     $('btnOpen').onclick = openDrawer;
-    $('btnReset').onclick = function(){ resetMode(); };
+    $('btnReset').onclick = function(){ resetBook(); };
+  }
+
+  function renderLoading(){
+    var m = metaOf(S.book);
+    $('main').innerHTML = '<div class="panel"><div class="spin"></div>' +
+      '<h2>正在加载「'+esc(m.name)+'」词书</h2>' +
+      '<p>'+m.count+' 个单词，首次加载后浏览器会缓存。</p></div>';
+  }
+
+  function renderLoadError(){
+    $('main').innerHTML = '<div class="panel"><div class="big">⚠️</div>' +
+      '<h2>词书加载失败</h2><p>请检查 books/ 目录是否完整，然后重试。</p>' +
+      '<div class="actions"><button class="btn got" id="btnRetry">重新加载</button></div></div>';
+    $('btnRetry').onclick = function(){ render(); };
   }
 
   function bindCard(o){
@@ -497,7 +526,6 @@
     card.onclick = function(e){
       if(e.target.closest('.star') || e.target.closest('.spk')) return;
       card.classList.toggle('flip');
-      if(card.classList.contains('flip') && S.autoSpeak) speak(o.w, 'en-US');
     };
     Array.prototype.forEach.call(card.querySelectorAll('.spk'), function(b){
       b.onclick = function(e){ e.stopPropagation(); speak(o.w, b.dataset.lang); };
@@ -505,48 +533,57 @@
     Array.prototype.forEach.call(card.querySelectorAll('.star'), function(b){
       b.onclick = function(e){
         e.stopPropagation();
-        if(S.fav[o.w]) delete S.fav[o.w]; else S.fav[o.w] = true;
+        var key = k(o.w);
+        if(S.fav[key]) delete S.fav[key]; else S.fav[key] = true;
         save();
-        Array.prototype.forEach.call(card.querySelectorAll('.star'), function(x){ x.classList.toggle('on', !!S.fav[o.w]); });
-        toast(S.fav[o.w] ? '已收藏' : '已取消收藏');
+        Array.prototype.forEach.call(card.querySelectorAll('.star'), function(x){ x.classList.toggle('on', !!S.fav[key]); });
+        toast(S.fav[key] ? '已收藏' : '已取消收藏');
       };
     });
   }
 
   function render(){
-    renderTabs(); renderDate(); renderProgress(); renderStats();
+    renderTabs(); renderStats();
+
+    if(!BOOKS[S.book]){
+      renderProgress(); renderDate();
+      renderLoading();
+      loadBook(S.book, function(ok){
+        if(ok) render(); else renderLoadError();
+      });
+      return;
+    }
+
+    renderDate(); renderProgress();
 
     var c = cur();
     if(!c.ids.length){ renderEmpty(); return; }
     if(c.idx >= c.ids.length){ renderDone(); return; }
 
-    var o = INDEX[c.ids[c.idx]];
+    var o = INDEX[S.book+'::'+c.ids[c.idx]];
     if(!o){ c.idx++; return render(); }
 
     $('main').innerHTML = cardHTML(o, false);
     bindCard(o);
-
     $('btnAgain').onclick = function(){ mark('no'); };
     $('btnGot').onclick   = function(){ mark('yes'); };
-
-    if(S.autoSpeak) setTimeout(function(){ speak(o.w,'en-US'); }, 220);
   }
 
   /* ============ 操作 ============ */
   function mark(kind){
     var c = cur();
     var w = c.ids[c.idx];
+    var key = k(w);
     c.res[w] = (kind === 'yes') ? 'yes' : 'no';
     if(kind === 'yes'){
-      S.learned[w] = Date.now();
-      if(S.wrong[w]) delete S.wrong[w];
+      S.learned[key] = Date.now();
+      if(S.wrong[key]) delete S.wrong[key];
     }else{
-      S.wrong[w] = true;
-      S.learned[w] = Date.now();
+      S.wrong[key] = true;
+      S.learned[key] = Date.now();
     }
     c.idx++;
     save();
-
     if(!inReview() && c.idx >= c.ids.length) finishDay();
     render();
   }
@@ -561,10 +598,13 @@
     save();
   }
 
-  function resetMode(){
-    var pool = poolOf(S.mode);
-    pool.forEach(function(o){ delete S.learned[o.w]; delete S.mastered[o.w]; delete S.wrong[o.w]; });
-    delete S.today[S.mode];
+  function resetBook(){
+    var list = BOOKS[S.book] || [];
+    list.forEach(function(o){
+      var key = k(o.w);
+      delete S.learned[key]; delete S.mastered[key]; delete S.wrong[key]; delete S.fav[key];
+    });
+    delete S.today[S.book];
     clearRV();
     save(); render(); renderDrawer(); toast('已重置');
   }
@@ -575,33 +615,39 @@
   function closeDrawer(){ drOpen = false; $('mask').classList.remove('on'); $('drawer').classList.remove('on'); }
 
   function renderDrawer(){
-    var m = MODES.filter(function(x){ return x.id===S.mode; })[0] || MODES[0];
+    var m = metaOf(S.book);
     $('drTitle').textContent = m.name + ' 词表';
+    if(!BOOKS[S.book]){ $('drBody').innerHTML = '<p style="text-align:center;color:var(--ink-3);font-size:13px;padding:30px 0">词书加载中…</p>'; return; }
     var q = ($('drSearch').value || '').trim().toLowerCase();
-    var list = poolOf(S.mode).filter(function(o){
+    var list = BOOKS[S.book].filter(function(o){
       if(!q) return true;
       return o.w.toLowerCase().indexOf(q) >= 0 || (o.m||'').indexOf(q) >= 0;
     });
-    $('drBody').innerHTML = list.map(function(o){
-      var st = S.mastered[o.w] ? 'learned' : (S.learned[o.w] ? (S.wrong[o.w] ? 'wrong' : 'learned') : '');
-      var mark = S.mastered[o.w] ? '✓' : '☆';
+    var CAP = 300;
+    var shown = list.slice(0, CAP);
+    var html = shown.map(function(o){
+      var key = k(o.w);
+      var st = S.mastered[key] ? 'learned' : (S.learned[key] ? (S.wrong[key] ? 'wrong' : 'learned') : '');
+      var mk = S.mastered[key] ? '✓' : '☆';
       return '<div class="li '+st+'">' +
         '<span class="dot"></span>' +
-        '<span class="txt"><span class="w">'+esc(o.w)+'<span>'+esc(o.p)+'</span></span>' +
-        '<span class="m">'+esc(o.t)+' '+esc(o.m)+'</span></span>' +
+        '<span class="txt"><span class="w">'+esc(o.w)+(o.p?'<span>'+esc(o.p)+'</span>':'')+'</span>' +
+        '<span class="m">'+esc((o.t?o.t+' ':'')+o.m)+'</span></span>' +
         '<button class="mini" data-say="'+esc(o.w)+'">🔊</button>' +
-        '<button class="mini '+(S.mastered[o.w]?'on':'')+'" data-master="'+esc(o.w)+'" title="标记已掌握">'+mark+'</button>' +
+        '<button class="mini '+(S.mastered[key]?'on':'')+'" data-master="'+esc(o.w)+'" title="标记已掌握">'+mk+'</button>' +
       '</div>';
-    }).join('') || '<p style="text-align:center;color:var(--ink-3);font-size:13px;padding:30px 0">没有匹配的单词</p>';
+    }).join('');
+    if(list.length > CAP) html += '<p style="text-align:center;color:var(--ink-3);font-size:12.5px;padding:14px 0">还有 '+(list.length-CAP)+' 个词，输入关键词可精确查找</p>';
+    $('drBody').innerHTML = html || '<p style="text-align:center;color:var(--ink-3);font-size:13px;padding:30px 0">没有匹配的单词</p>';
 
     Array.prototype.forEach.call($('drBody').querySelectorAll('[data-say]'), function(b){
       b.onclick = function(){ speak(b.dataset.say, 'en-US'); };
     });
     Array.prototype.forEach.call($('drBody').querySelectorAll('[data-master]'), function(b){
       b.onclick = function(){
-        var w = b.dataset.master;
-        if(S.mastered[w]) delete S.mastered[w];
-        else { S.mastered[w] = true; S.learned[w] = Date.now(); if(S.wrong[w]) delete S.wrong[w]; }
+        var key = k(b.dataset.master);
+        if(S.mastered[key]) delete S.mastered[key];
+        else { S.mastered[key] = true; S.learned[key] = Date.now(); if(S.wrong[key]) delete S.wrong[key]; }
         save(); renderDrawer(); render();
       };
     });
@@ -610,35 +656,41 @@
   /* ============ 事件 ============ */
   $('mask').onclick = closeDrawer;
   $('drClose').onclick = closeDrawer;
-  $('drReset').onclick = function(){ if(confirm('确定重置「'+S.mode+'」词库的学习进度？')) resetMode(); };
+  $('drReset').onclick = function(){ if(confirm('确定重置「'+metaOf(S.book).name+'」词书的学习进度？')) resetBook(); };
   $('drSearch').oninput = renderDrawer;
 
   document.addEventListener('keydown', function(e){
-    if(drOpen) { if(e.key === 'Escape') closeDrawer(); return; }
+    if(drOpen){ if(e.key === 'Escape') closeDrawer(); return; }
     if(e.target && e.target.tagName === 'INPUT') return;
+    if(!BOOKS[S.book]) return;
     var c = cur();
     if(!c.ids.length || c.idx >= c.ids.length) return;
-    var o = INDEX[c.ids[c.idx]];
-    var k = (e.key || '').toLowerCase();
+    var o = INDEX[S.book+'::'+c.ids[c.idx]];
+    var kk = (e.key || '').toLowerCase();
     if(e.code === 'Space' || e.key === 'Enter'){
       e.preventDefault();
       var card = $('card'); if(card) card.classList.toggle('flip');
-    }else if(e.key === '1' || k === 'j'){ e.preventDefault(); mark('no'); }
-    else if(e.key === '2' || k === 'k'){ e.preventDefault(); mark('yes'); }
-    else if(k === 'p' && o){ e.preventDefault(); speak(o.w, 'en-US'); }
-    else if(k === 'f' && o){
+    }else if(e.key === '1' || kk === 'j'){ e.preventDefault(); mark('no'); }
+    else if(e.key === '2' || kk === 'k'){ e.preventDefault(); mark('yes'); }
+    else if(kk === 'p' && o){ e.preventDefault(); speak(o.w, 'en-US'); }
+    else if(kk === 'f' && o){
       e.preventDefault();
-      if(S.fav[o.w]) delete S.fav[o.w]; else S.fav[o.w] = true;
+      var key = k(o.w);
+      if(S.fav[key]) delete S.fav[key]; else S.fav[key] = true;
       save();
       var card2 = $('card');
-      if(card2) Array.prototype.forEach.call(card2.querySelectorAll('.star'), function(x){ x.classList.toggle('on', !!S.fav[o.w]); });
-      toast(S.fav[o.w] ? '已收藏' : '已取消收藏');
+      if(card2) Array.prototype.forEach.call(card2.querySelectorAll('.star'), function(x){ x.classList.toggle('on', !!S.fav[key]); });
+      toast(S.fav[key] ? '已收藏' : '已取消收藏');
     }
   });
 
   /* ============ 启动 ============ */
   load();
-  render();
+  if(!META.length){
+    $('main').innerHTML = '<div class="panel"><h2>词书清单缺失</h2><p>请确认 books/meta.js 是否存在。</p></div>';
+  }else{
+    render();
+  }
   setTimeout(function(){ if(window.speechSynthesis) voices = speechSynthesis.getVoices(); }, 500);
 })();
 </script>

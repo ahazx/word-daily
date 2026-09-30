@@ -1,0 +1,1 @@
+window.BOOK_META=[{"id":"tech","name":"互联网","count":50,"desc":"互联网/科技行业高频词"},{"id":"daily","name":"日常","count":859,"desc":"生活场景实用词"},{"id":"work","name":"职场","count":2753,"desc":"商务英语 BEC 词汇"},{"id":"primary","name":"小学初中","count":1725,"desc":"人教版小学 8 册 + 初中词汇"},{"id":"kaoyan","name":"考研","count":4533,"desc":"考研英语大纲词汇"}];
