@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>每日五词 · 多词书背单词</title>
+<title>每日五词 · 自选词书背单词</title>
 <style>
   :root{
     --bg:#eef1f7;
@@ -35,24 +35,25 @@
   .app{ max-width:720px; margin:0 auto; }
 
   /* ---------- header ---------- */
-  header{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+  header{ display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:14px; flex-wrap:wrap; }
   .brand{ font-size:21px; font-weight:700; letter-spacing:.2px; display:flex; align-items:center; gap:8px; }
   .brand small{ font-size:12px; font-weight:500; color:var(--ink-3); letter-spacing:0; }
   .date{ font-size:13px; color:var(--ink-2); }
   .date b{ color:var(--brand); font-weight:600; }
 
-  /* ---------- tabs ---------- */
-  .tabs{ display:flex; gap:6px; background:#fff; padding:6px; border-radius:14px; box-shadow:var(--shadow); margin-bottom:14px; overflow-x:auto; scrollbar-width:none; }
-  .tabs::-webkit-scrollbar{ display:none; }
-  .tab{
-    flex:0 0 auto; border:0; background:transparent; cursor:pointer;
-    padding:9px 14px; border-radius:10px; font-size:14px; font-weight:600; color:var(--ink-2);
-    font-family:inherit; transition:.18s; white-space:nowrap;
-  }
-  .tab:hover{ background:#f4f6fb; color:var(--ink); }
-  .tab.on{ background:var(--brand); color:#fff; box-shadow:0 4px 12px rgba(79,70,229,.28); }
-  .tab .n{ font-size:11px; opacity:.6; margin-left:4px; font-weight:500; }
-  .tab.on .n{ opacity:.8; }
+  /* ---------- plan chips ---------- */
+  .plan-bar{ display:flex; gap:8px; align-items:center; background:#fff; padding:8px; border-radius:14px; box-shadow:var(--shadow); margin-bottom:12px; }
+  .chips{ display:flex; gap:6px; overflow-x:auto; flex:1; scrollbar-width:none; padding:2px; }
+  .chips::-webkit-scrollbar{ display:none; }
+  .chip-b{ display:inline-flex; align-items:center; gap:6px; flex:0 0 auto; background:var(--brand-soft); color:var(--brand);
+    border:0; border-radius:9px; padding:7px 10px; font-size:12.5px; font-weight:600; font-family:inherit; cursor:pointer; transition:.16s; }
+  .chip-b:hover{ background:#e2e6ff; }
+  .chip-b .x{ opacity:.5; font-size:13px; }
+  .chip-b:hover .x{ opacity:1; }
+  .add-book{ flex:0 0 auto; border:0; background:var(--brand); color:#fff; border-radius:10px; padding:8px 13px;
+    font-size:13px; font-weight:700; font-family:inherit; cursor:pointer; transition:.16s; white-space:nowrap; }
+  .add-book:hover{ background:#4338ca; }
+  .empty-plan{ color:var(--ink-3); font-size:13px; padding:4px 6px; }
 
   /* ---------- progress ---------- */
   .bar{ background:#fff; border-radius:14px; padding:13px 16px; box-shadow:var(--shadow); margin-bottom:16px; }
@@ -76,10 +77,6 @@
     text-align:center; min-height:330px; border:1px solid rgba(255,255,255,.9);
   }
   .back{ transform:rotateY(180deg); justify-content:center; }
-  .cat{
-    position:absolute; top:16px; left:18px; font-size:11px; font-weight:700; letter-spacing:.6px;
-    padding:4px 10px; border-radius:99px; background:var(--brand-soft); color:var(--brand);
-  }
   .star{ position:absolute; top:12px; right:14px; border:0; background:transparent; font-size:19px; cursor:pointer; padding:4px; line-height:1; filter:grayscale(1); opacity:.4; transition:.18s; }
   .star:hover{ opacity:.8; }
   .star.on{ filter:none; opacity:1; }
@@ -117,9 +114,11 @@
   .btn.got:hover{ background:#0b9066; }
   .btn.ghost{ background:#fff; color:var(--ink-2); box-shadow:var(--shadow); flex:0 0 auto; padding:15px 18px; }
   .btn.ghost:hover{ color:var(--brand); }
+  .btn.primary{ background:var(--brand); color:#fff; }
+  .btn.primary:hover{ background:#4338ca; }
   .btn[disabled]{ opacity:.45; cursor:not-allowed; }
 
-  /* ---------- done / empty / loading ---------- */
+  /* ---------- panels ---------- */
   .panel{ background:#fff; border-radius:22px; box-shadow:var(--shadow); padding:34px 26px; text-align:center; }
   .panel .big{ font-size:44px; line-height:1; margin-bottom:14px; }
   .panel h2{ margin:0 0 8px; font-size:21px; }
@@ -141,11 +140,11 @@
   .chip{ background:#fff; border-radius:12px; padding:11px 15px; box-shadow:var(--shadow); font-size:12.5px; color:var(--ink-2); flex:1; min-width:104px; }
   .chip b{ display:block; font-size:19px; color:var(--ink); margin-bottom:2px; font-weight:700; }
 
-  /* ---------- list drawer ---------- */
+  /* ---------- drawer ---------- */
   .mask{ position:fixed; inset:0; background:rgba(20,26,40,.42); backdrop-filter:blur(3px); display:none; z-index:40; }
   .mask.on{ display:block; }
   .drawer{
-    position:fixed; top:0; right:0; bottom:0; width:min(460px,92vw); background:#fff; z-index:41;
+    position:fixed; top:0; right:0; bottom:0; width:min(480px,94vw); background:#fff; z-index:41;
     box-shadow:-14px 0 40px rgba(20,26,40,.16); transform:translateX(102%); transition:transform .34s cubic-bezier(.3,.1,.2,1);
     display:flex; flex-direction:column;
   }
@@ -158,7 +157,21 @@
     background:#f8fafc; font-size:14px; font-family:inherit; outline:none; color:var(--ink);
   }
   .dr-head input:focus{ border-color:#c7cbff; background:#fff; }
-  .dr-body{ overflow-y:auto; padding:10px 12px 24px; flex:1; }
+  .sel-info{ margin-top:10px; font-size:12.5px; color:var(--ink-2); }
+  .sel-info b{ color:var(--brand); font-size:14px; }
+  .dr-body{ overflow-y:auto; padding:8px 12px 24px; flex:1; }
+  .grp{ margin-top:10px; }
+  .grp-h{ display:flex; align-items:center; justify-content:space-between; padding:8px 10px 6px; }
+  .grp-h .gt{ font-size:12px; font-weight:700; color:var(--ink-3); letter-spacing:.5px; }
+  .grp-h .ga{ border:0; background:transparent; color:var(--brand); font-size:11.5px; font-weight:600; font-family:inherit; cursor:pointer; padding:2px 4px; }
+  .grp-h .ga:hover{ text-decoration:underline; }
+  .bk{ display:flex; align-items:center; gap:11px; padding:10px 12px; border-radius:11px; cursor:pointer; }
+  .bk:hover{ background:#f7f9fc; }
+  .bk input{ width:17px; height:17px; accent-color:var(--brand); cursor:pointer; flex:0 0 auto; }
+  .bk .bn{ flex:1; min-width:0; font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .bk .bc{ font-size:12px; color:var(--ink-3); flex:0 0 auto; font-variant-numeric:tabular-nums; }
+  .bk.on .bn{ color:var(--brand); }
+
   .li{ display:flex; align-items:center; gap:10px; padding:11px 12px; border-radius:12px; }
   .li:hover{ background:#f7f9fc; }
   .li .dot{ width:7px; height:7px; border-radius:99px; background:#dbe1ec; flex:0 0 auto; }
@@ -172,7 +185,7 @@
   .mini:hover{ background:#eef1f7; color:var(--brand); }
   .mini.on{ color:var(--ok); }
   .dr-foot{ padding:12px 18px; border-top:1px solid var(--line); display:flex; gap:8px; }
-  .dr-foot .btn{ padding:11px; font-size:13.5px; }
+  .dr-foot .btn{ padding:12px; font-size:14px; }
 
   .toast{
     position:fixed; left:50%; bottom:34px; transform:translate(-50%,20px); background:#1c2333; color:#fff;
@@ -191,11 +204,14 @@
 <div class="app">
 
   <header>
-    <div class="brand">📖 每日五词 <small>每天 5 个 · 会读会认</small></div>
+    <div class="brand">📖 每日五词 <small>每天 5 个 · 词书自选</small></div>
     <div class="date" id="dateLine"></div>
   </header>
 
-  <nav class="tabs" id="tabs"></nav>
+  <div class="plan-bar">
+    <div class="chips" id="chips"></div>
+    <button class="add-book" id="btnBooks">＋ 词书</button>
+  </div>
 
   <div class="bar">
     <div class="bar-top">
@@ -216,14 +232,30 @@
 </div>
 
 <div class="mask" id="mask"></div>
-<aside class="drawer" id="drawer">
+
+<!-- 词书选择 -->
+<aside class="drawer" id="bookDrawer">
+  <div class="dr-head">
+    <div class="t1"><span>选择词书</span><button class="x" id="bkClose">✕</button></div>
+    <input id="bkSearch" placeholder="搜索词书名称，如 考研 / 雅思 / 初中…" autocomplete="off">
+    <div class="sel-info" id="selInfo"></div>
+  </div>
+  <div class="dr-body" id="bookList"></div>
+  <div class="dr-foot">
+    <button class="btn ghost" id="bkClear" style="flex:0 0 auto">清空</button>
+    <button class="btn primary" id="bkDone" style="flex:1">完成</button>
+  </div>
+</aside>
+
+<!-- 词表 -->
+<aside class="drawer" id="listDrawer">
   <div class="dr-head">
     <div class="t1"><span id="drTitle">词表</span><button class="x" id="drClose">✕</button></div>
     <input id="drSearch" placeholder="搜索单词或中文释义…" autocomplete="off">
   </div>
   <div class="dr-body" id="drBody"></div>
   <div class="dr-foot">
-    <button class="btn ghost" id="drReset" style="flex:1">重置当前词书进度</button>
+    <button class="btn ghost" id="drReset" style="flex:1">重置全部学习进度</button>
   </div>
 </aside>
 
@@ -235,15 +267,22 @@
   "use strict";
 
   var PER_DAY = 5;
-  var KEY = 'word-daily-v2';
+  var KEY = 'word-daily-v3';
   var META = window.BOOK_META || [];
-  var BOOKS = {};     // id -> [{w,p,t,m,e,z}]
-  var INDEX = {};     // "id::word" -> 词对象
+  var BOOKS = {};        // id -> [{w,p,t,m,e,z}]
   var LOADING = {};
+  var POOL = null;       // 合并池（按单词去重）
+  var POOL_MAP = null;   // 小写单词 -> 词对象（O(1) 查找，池子可能十几万词）
+  var POOL_ORDER = null; // 固定洗牌顺序
+  var PLAN_KEY = '';
+
+  var CAT_ORDER = ['精选', '小学', '初中', '高中', '四级', '六级', '考研', '出国考试', '专四专八', '职场商务', '其他'];
 
   var S = {
-    book: (META[0] || {}).id || 'tech',
-    learned:{}, mastered:{}, fav:{}, wrong:{}, today:{}, streak:{ last:'', days:0 }
+    plan: [],            // 勾选的词书 id
+    learned:{}, mastered:{}, fav:{}, wrong:{},
+    today: null,         // { date, planKey, ids, idx, res }
+    streak:{ last:'', days:0 }
   };
 
   function load(){
@@ -251,6 +290,10 @@
       var raw = localStorage.getItem(KEY);
       if(raw){ var o = JSON.parse(raw); Object.keys(S).forEach(function(kk){ if(o[kk]!==undefined) S[kk]=o[kk]; }); }
     }catch(e){}
+    if(!S.plan || !S.plan.length){
+      var def = ['tech','hand_daily'].filter(function(id){ return metaOf(id).count; });
+      S.plan = def.length ? def : (META[0] ? [META[0].id] : []);
+    }
   }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
 
@@ -279,19 +322,20 @@
   }
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function $(id){ return document.getElementById(id); }
+  function fmt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
   var toastT;
   function toast(msg){
     var el = $('toast'); el.textContent = msg; el.classList.add('on');
-    clearTimeout(toastT); toastT = setTimeout(function(){ el.classList.remove('on'); }, 1700);
+    clearTimeout(toastT); toastT = setTimeout(function(){ el.classList.remove('on'); }, 1800);
   }
   function metaOf(id){
     for(var i=0;i<META.length;i++) if(META[i].id===id) return META[i];
-    return { id:id, name:id, count:0, desc:'' };
+    return { id:id, name:id, count:0, cat:'其他' };
   }
-  /* 进度键：同一单词可能出现在多本词书里，必须按词书隔离 */
-  function k(word){ return S.book + '::' + word; }
+  /* 合并池里单词唯一，直接用单词小写做进度键 */
+  function k(word){ return String(word).toLowerCase(); }
 
-  /* ============ 词书按需加载 ============ */
+  /* ============ 词书加载 ============ */
   function loadBook(id, cb){
     if(BOOKS[id]) return cb(true);
     if(LOADING[id]){ LOADING[id].push(cb); return; }
@@ -300,11 +344,9 @@
     s.src = 'books/' + id + '.js';
     s.onload = function(){
       var raw = (window.BOOKS && window.BOOKS[id]) || [];
-      var list = raw.map(function(r){
-        return { w:r[0], p:r[1]||'', t:r[2]||'', m:r[3]||'', e:r[4]||'', z:r[5]||'', cat:id };
+      BOOKS[id] = raw.map(function(r){
+        return { w:r[0], p:r[1]||'', t:r[2]||'', m:r[3]||'', e:r[4]||'', z:r[5]||'' };
       });
-      BOOKS[id] = list;
-      list.forEach(function(o){ INDEX[id+'::'+o.w] = o; });
       var q = LOADING[id] || []; delete LOADING[id];
       q.forEach(function(f){ try{ f(true); }catch(e){} });
     };
@@ -315,6 +357,67 @@
     document.head.appendChild(s);
   }
 
+  function loadPlan(cb){
+    var ids = (S.plan||[]).slice();
+    var todo = ids.filter(function(id){ return !BOOKS[id]; });
+    if(!todo.length) return cb(true);
+    var done = 0, failed = [];
+    todo.forEach(function(id){
+      loadBook(id, function(ok){
+        done++;
+        if(!ok) failed.push(id);
+        if(done < todo.length){
+          renderLoading('正在加载词书 ' + done + ' / ' + todo.length + ' …');
+        }else{
+          cb(failed.length === 0, failed);
+        }
+      });
+    });
+  }
+
+  /* ============ 合并池 ============ */
+  function planKeyOf(){ return (S.plan||[]).slice().sort().join(','); }
+  function rebuildPool(){
+    var pool = [], map = {};
+    (S.plan||[]).forEach(function(bid){
+      (BOOKS[bid]||[]).forEach(function(o){
+        var key = o.w.toLowerCase();
+        if(map[key]) return;
+        map[key] = o;
+        pool.push(o);
+      });
+    });
+    POOL = pool;
+    POOL_MAP = map;
+    PLAN_KEY = planKeyOf();
+    POOL_ORDER = shuffle(pool.map(function(o){ return o.w; }), 'order::' + PLAN_KEY);
+  }
+  function ensurePool(){ if(!POOL || PLAN_KEY !== planKeyOf()) rebuildPool(); return POOL; }
+  function wordObj(w){
+    var blank = { w:w, p:'', t:'', m:'', e:'', z:'' };
+    if(!POOL_MAP) return blank;
+    return POOL_MAP[String(w).toLowerCase()] || blank;
+  }
+
+  /* ============ 今日词 ============ */
+  function ensureToday(){
+    ensurePool();
+    var d = todayStr(), t = S.today, pk = planKeyOf();
+    if(t && t.date === d && t.planKey === pk && t.ids && t.ids.length) return t;
+    var avail = POOL_ORDER.filter(function(w){ return !S.learned[k(w)] && !S.mastered[k(w)]; });
+    S.today = { date:d, planKey:pk, ids:avail.slice(0, PER_DAY), idx:0, res:{} };
+    save();
+    return S.today;
+  }
+  var RV = { ids:[], idx:0, res:{}, kind:'review' };
+  function inReview(){ return RV.ids.length > 0; }
+  function cur(){ return inReview() ? RV : ensureToday(); }
+  function clearRV(){ RV = { ids:[], idx:0, res:{}, kind:'review' }; }
+  function nextBatch(n){
+    ensurePool();
+    return POOL_ORDER.filter(function(w){ return !S.learned[k(w)] && !S.mastered[k(w)]; }).slice(0, n);
+  }
+
   /* ============ 发音 ============ */
   var voices = [];
   function pickVoice(lang){
@@ -322,8 +425,7 @@
     var norm = function(s){ return (s||'').replace('_','-').toLowerCase(); };
     var l = lang.toLowerCase();
     return voices.filter(function(v){ return norm(v.lang) === l; })[0]
-        || voices.filter(function(v){ return norm(v.lang).indexOf(l.slice(0,2))===0; })[0]
-        || null;
+        || voices.filter(function(v){ return norm(v.lang).indexOf(l.slice(0,2))===0; })[0] || null;
   }
   if(window.speechSynthesis){
     speechSynthesis.onvoiceschanged = function(){ voices = speechSynthesis.getVoices(); };
@@ -340,37 +442,24 @@
     speechSynthesis.speak(u);
   }
 
-  /* ============ 今日词 ============ */
-  function ensureToday(){
-    var d = todayStr(), t = S.today[S.book];
-    if(t && t.date === d && t.ids && t.ids.length) return t;
-    var list = BOOKS[S.book] || [];
-    var order = shuffle(list.map(function(o){ return o.w; }), 'order::' + S.book);
-    var avail = order.filter(function(w){ return !S.learned[k(w)] && !S.mastered[k(w)]; });
-    S.today[S.book] = { date:d, ids:avail.slice(0, PER_DAY), idx:0, res:{} };
-    save();
-    return S.today[S.book];
-  }
-  var RV = { ids:[], idx:0, res:{}, kind:'review' };
-  function inReview(){ return RV.ids.length > 0; }
-  function cur(){ return inReview() ? RV : ensureToday(); }
-  function clearRV(){ RV = { ids:[], idx:0, res:{}, kind:'review' }; }
-  function nextBatch(n){
-    var list = BOOKS[S.book] || [];
-    var order = shuffle(list.map(function(o){ return o.w; }), 'order::' + S.book);
-    return order.filter(function(w){ return !S.learned[k(w)] && !S.mastered[k(w)]; }).slice(0, n);
-  }
-
-  /* ============ 渲染 ============ */
-  function renderTabs(){
-    $('tabs').innerHTML = META.map(function(m){
-      return '<button class="tab'+(S.book===m.id?' on':'')+'" data-book="'+m.id+'">'+
-        esc(m.name)+'<span class="n">'+m.count+'</span></button>';
+  /* ============ 渲染：顶部计划条 ============ */
+  function renderChips(){
+    var plan = S.plan || [];
+    if(!plan.length){
+      $('chips').innerHTML = '<span class="empty-plan">还没有选择词书，点右边「＋ 词书」开始</span>';
+      return;
+    }
+    $('chips').innerHTML = plan.map(function(id){
+      var m = metaOf(id);
+      return '<button class="chip-b" data-remove="'+esc(id)+'" title="点击移除">'+esc(m.name)+' <span class="x">✕</span></button>';
     }).join('');
-    Array.prototype.forEach.call($('tabs').children, function(b){
+    Array.prototype.forEach.call($('chips').querySelectorAll('[data-remove]'), function(b){
       b.onclick = function(){
-        if(S.book === b.dataset.book) return;
-        S.book = b.dataset.book; clearRV(); save(); render();
+        var id = b.dataset.remove;
+        S.plan = S.plan.filter(function(x){ return x !== id; });
+        if(!S.plan.length){ S.plan = []; }
+        S.today = null; POOL = null; clearRV(); save(); render();
+        toast('已移除 ' + metaOf(id).name);
       };
     });
   }
@@ -378,10 +467,8 @@
   function renderDate(){
     var d = new Date();
     var wk = ['日','一','二','三','四','五','六'][d.getDay()];
-    var list = BOOKS[S.book] || [];
-    var order = shuffle(list.map(function(o){ return o.w; }), 'order::' + S.book);
-    var avail = order.filter(function(w){ return !S.learned[k(w)] && !S.mastered[k(w)]; });
-    var done = list.length - avail.length;
+    ensurePool();
+    var done = POOL.length - POOL_ORDER.filter(function(w){ return !S.learned[k(w)] && !S.mastered[k(w)]; }).length;
     var dayNo = Math.max(1, Math.ceil(done / PER_DAY));
     $('dateLine').innerHTML = (d.getMonth()+1)+'月'+d.getDate()+'日 周'+wk+' · 第 <b>'+dayNo+'</b> 天';
   }
@@ -392,8 +479,10 @@
     $('pNow').textContent = Math.min(c.idx, total);
     $('pAll').textContent = total;
     $('pFill').style.width = total ? Math.round(Math.min(c.idx,total)/total*100)+'%' : '0%';
-    var m = metaOf(S.book);
-    $('barLabel').textContent = inReview() ? ('复习 · ' + m.name) : ('今日进度 · ' + m.name + '（共 ' + m.count + ' 词）');
+    ensurePool();
+    $('barLabel').textContent = inReview()
+      ? '复习中'
+      : ('今日进度 · 已选 ' + (S.plan||[]).length + ' 本 / 共 ' + fmt(POOL.length) + ' 词');
   }
 
   function renderStats(){
@@ -407,8 +496,8 @@
     $('sWrong').textContent = nw;
   }
 
+  /* ============ 渲染：卡片 ============ */
   function cardHTML(o, flipped){
-    var m = metaOf(o.cat);
     var star = S.fav[k(o.w)] ? 'on' : '';
     var phon = o.p ? '<span class="ipa">'+esc(o.p)+'</span>' : '';
     var eg = o.e
@@ -418,7 +507,6 @@
     return '' +
     '<div class="wrap"><div class="card'+(flipped?' flip':'')+'" id="card">' +
       '<div class="face front">' +
-        '<span class="cat">'+esc(m.name)+'</span>' +
         '<button class="star '+star+'" title="收藏">⭐</button>' +
         '<div class="word">'+esc(o.w)+'</div>' +
         '<div class="phon-row">' + phon +
@@ -428,7 +516,6 @@
         '<div class="hint">点击卡片 / 按 <kbd>空格</kbd> 查看释义</div>' +
       '</div>' +
       '<div class="face back">' +
-        '<span class="cat">'+esc(m.name)+'</span>' +
         '<button class="star '+star+'" title="收藏">⭐</button>' +
         '<div class="word">'+esc(o.w)+'</div>' +
         '<div class="phon-row">' + phon +
@@ -452,7 +539,7 @@
     var good = ids.length - bad.length;
     var isExtra = inReview() && RV.kind === 'extra';
     var rows = ids.map(function(w){
-      var o = INDEX[S.book+'::'+w] || { w:w, m:'' };
+      var o = wordObj(w);
       var isBad = res[w] === 'no';
       return '<div class="rv'+(isBad?' bad':'')+'">' +
         '<button class="mini" data-say="'+esc(w)+'">🔊</button>' +
@@ -476,7 +563,7 @@
         '<div class="actions" style="flex-wrap:wrap">' +
           (bad.length ? '<button class="btn again" id="btnRedo">🔁 再练这 '+bad.length+' 个</button>' : '') +
           (canExtra ? '<button class="btn ghost" id="btnExtra" style="flex:1">➕ 再背 5 个</button>' : '') +
-          '<button class="btn got" id="btnNext" style="flex:1">📚 去看词表</button>' +
+          '<button class="btn got" id="btnNext" style="flex:1">📚 看词表</button>' +
         '</div>' +
       '</div>';
 
@@ -487,36 +574,49 @@
     if(redo) redo.onclick = function(){ RV = { ids: bad.slice(), idx:0, res:{}, kind:'review' }; render(); };
     var extra = $('btnExtra');
     if(extra) extra.onclick = function(){ RV = { ids: nextBatch(PER_DAY), idx:0, res:{}, kind:'extra' }; render(); };
-    $('btnNext').onclick = function(){ clearRV(); render(); openDrawer(); };
+    $('btnNext').onclick = function(){ clearRV(); render(); openList(); };
   }
 
-  function renderEmpty(){
-    var m = metaOf(S.book);
+  function renderNoPlan(){
+    $('main').innerHTML =
+      '<div class="panel">' +
+        '<div class="big">📚</div>' +
+        '<h2>先挑几本词书吧</h2>' +
+        '<p>这里准备了 <b>'+META.length+'</b> 本词书，共 <b>'+fmt(META.reduce(function(a,b){ return a+b.count; },0))+'</b> 个单词。<br>' +
+        '从小学到专八、考研到雅思托福，勾选你想学的就行。</p>' +
+        '<div class="actions" style="margin-top:22px">' +
+          '<button class="btn primary" id="btnPick">选择词书</button>' +
+        '</div>' +
+      '</div>';
+    $('btnPick').onclick = openBooks;
+  }
+
+  function renderAllDone(){
     $('main').innerHTML =
       '<div class="panel">' +
         '<div class="big">🏆</div>' +
-        '<h2>「'+esc(m.name)+'」已全部学完</h2>' +
-        '<p>这本词书没有未学的单词了。可以在词表里复习，或重置进度重新开始。</p>' +
+        '<h2>选中的词书已全部学完</h2>' +
+        '<p>共 '+fmt(POOL.length)+' 个单词。可以再勾选别的词书，或者重置进度重来。</p>' +
         '<div class="actions">' +
-          '<button class="btn again" id="btnOpen">📚 打开词表</button>' +
-          '<button class="btn got" id="btnReset">↺ 重置进度</button>' +
+          '<button class="btn again" id="btnPick2">＋ 添加词书</button>' +
+          '<button class="btn got" id="btnReset2">↺ 重置进度</button>' +
         '</div>' +
       '</div>';
-    $('btnOpen').onclick = openDrawer;
-    $('btnReset').onclick = function(){ resetBook(); };
+    $('btnPick2').onclick = openBooks;
+    $('btnReset2').onclick = function(){ resetAll(); };
   }
 
-  function renderLoading(){
-    var m = metaOf(S.book);
+  function renderLoading(msg){
     $('main').innerHTML = '<div class="panel"><div class="spin"></div>' +
-      '<h2>正在加载「'+esc(m.name)+'」词书</h2>' +
-      '<p>'+m.count+' 个单词，首次加载后浏览器会缓存。</p></div>';
+      '<h2>'+esc(msg || '正在加载词书…')+'</h2>' +
+      '<p>首次加载会下载词条数据，之后浏览器会缓存。</p></div>';
   }
 
-  function renderLoadError(){
+  function renderLoadError(failed){
     $('main').innerHTML = '<div class="panel"><div class="big">⚠️</div>' +
-      '<h2>词书加载失败</h2><p>请检查 books/ 目录是否完整，然后重试。</p>' +
-      '<div class="actions"><button class="btn got" id="btnRetry">重新加载</button></div></div>';
+      '<h2>词书加载失败</h2><p>' + (failed && failed.length ? '未能加载：'+esc(failed.join('、')) : '请检查 books/ 目录是否完整。') +
+      '<br>可以刷新页面重试，或先移除这些词书。</p>' +
+      '<div class="actions"><button class="btn primary" id="btnRetry">重试</button></div></div>';
     $('btnRetry').onclick = function(){ render(); };
   }
 
@@ -543,13 +643,15 @@
   }
 
   function render(){
-    renderTabs(); renderStats();
+    renderChips(); renderStats();
 
-    if(!BOOKS[S.book]){
-      renderProgress(); renderDate();
-      renderLoading();
-      loadBook(S.book, function(ok){
-        if(ok) render(); else renderLoadError();
+    if(!(S.plan||[]).length){ renderDate(); renderNoPlan(); $('barLabel').textContent='今日进度'; $('pNow').textContent='0'; $('pAll').textContent='5'; $('pFill').style.width='0%'; return; }
+
+    var need = (S.plan||[]).filter(function(id){ return !BOOKS[id]; });
+    if(need.length){
+      renderLoading('正在加载词书 ' + (S.plan.length - need.length) + ' / ' + S.plan.length + ' …');
+      loadPlan(function(ok, failed){
+        if(ok) render(); else renderLoadError(failed);
       });
       return;
     }
@@ -557,12 +659,10 @@
     renderDate(); renderProgress();
 
     var c = cur();
-    if(!c.ids.length){ renderEmpty(); return; }
+    if(!c.ids.length){ renderAllDone(); return; }
     if(c.idx >= c.ids.length){ renderDone(); return; }
 
-    var o = INDEX[S.book+'::'+c.ids[c.idx]];
-    if(!o){ c.idx++; return render(); }
-
+    var o = wordObj(c.ids[c.idx]);
     $('main').innerHTML = cardHTML(o, false);
     bindCard(o);
     $('btnAgain').onclick = function(){ mark('no'); };
@@ -598,34 +698,87 @@
     save();
   }
 
-  function resetBook(){
-    var list = BOOKS[S.book] || [];
-    list.forEach(function(o){
-      var key = k(o.w);
-      delete S.learned[key]; delete S.mastered[key]; delete S.wrong[key]; delete S.fav[key];
+  function resetAll(){
+    S.learned = {}; S.mastered = {}; S.wrong = {}; S.fav = {};
+    S.today = null; clearRV();
+    save(); render(); renderList(); toast('已重置');
+  }
+
+  /* ============ 词书选择抽屉 ============ */
+  var bkOpen = false;
+  function openBooks(){ bkOpen = true; $('mask').classList.add('on'); $('bookDrawer').classList.add('on'); renderBookList(); }
+  function closeBooks(){ bkOpen = false; $('mask').classList.remove('on'); $('bookDrawer').classList.remove('on'); }
+
+  function renderBookList(){
+    var q = ($('bkSearch').value || '').trim().toLowerCase();
+    var sel = {};
+    (S.plan||[]).forEach(function(id){ sel[id] = 1; });
+
+    var groups = {};
+    META.forEach(function(m){
+      if(q && m.name.toLowerCase().indexOf(q) < 0 && (m.cat||'').toLowerCase().indexOf(q) < 0) return;
+      (groups[m.cat] = groups[m.cat] || []).push(m);
     });
-    delete S.today[S.book];
-    clearRV();
-    save(); render(); renderDrawer(); toast('已重置');
+
+    var html = '';
+    CAT_ORDER.forEach(function(cat){
+      var arr = groups[cat];
+      if(!arr || !arr.length) return;
+      arr.sort(function(a,b){ return b.count - a.count; });
+      var selCount = arr.filter(function(m){ return sel[m.id]; }).length;
+      html += '<div class="grp"><div class="grp-h"><span class="gt">'+esc(cat)+' · '+arr.length+' 本</span>' +
+        '<button class="ga" data-cat="'+esc(cat)+'">'+(selCount===arr.length?'取消全选':'全选')+'</button></div>';
+      arr.forEach(function(m){
+        html += '<label class="bk'+(sel[m.id]?' on':'')+'">' +
+          '<input type="checkbox" data-book="'+esc(m.id)+'"'+(sel[m.id]?' checked':'')+'>' +
+          '<span class="bn">'+esc(m.name)+'</span>' +
+          '<span class="bc">'+fmt(m.count)+'</span></label>';
+      });
+      html += '</div>';
+    });
+    $('bookList').innerHTML = html || '<p style="text-align:center;color:var(--ink-3);font-size:13px;padding:30px 0">没有匹配的词书</p>';
+
+    var totalWords = META.filter(function(m){ return sel[m.id]; }).reduce(function(a,b){ return a+b.count; }, 0);
+    $('selInfo').innerHTML = '已选 <b>'+(S.plan||[]).length+'</b> 本 · 共 <b>'+fmt(totalWords)+'</b> 词' +
+      (totalWords > 20000 ? ' <span style="color:var(--warn)">（词量较大，首次加载会慢一些）</span>' : '');
+
+    Array.prototype.forEach.call($('bookList').querySelectorAll('input[data-book]'), function(cb){
+      cb.onchange = function(){
+        var id = cb.dataset.book;
+        if(cb.checked){ if(S.plan.indexOf(id) < 0) S.plan.push(id); }
+        else S.plan = S.plan.filter(function(x){ return x !== id; });
+        S.today = null; POOL = null; clearRV(); save();
+        renderBookList(); render();
+      };
+    });
+    Array.prototype.forEach.call($('bookList').querySelectorAll('[data-cat]'), function(b){
+      b.onclick = function(){
+        var cat = b.dataset.cat;
+        var ids = META.filter(function(m){ return m.cat === cat; }).map(function(m){ return m.id; });
+        var allSel = ids.every(function(id){ return S.plan.indexOf(id) >= 0; });
+        if(allSel) S.plan = S.plan.filter(function(x){ return ids.indexOf(x) < 0; });
+        else ids.forEach(function(id){ if(S.plan.indexOf(id) < 0) S.plan.push(id); });
+        S.today = null; POOL = null; clearRV(); save();
+        renderBookList(); render();
+      };
+    });
   }
 
   /* ============ 词表抽屉 ============ */
-  var drOpen = false;
-  function openDrawer(){ drOpen = true; $('mask').classList.add('on'); $('drawer').classList.add('on'); renderDrawer(); }
-  function closeDrawer(){ drOpen = false; $('mask').classList.remove('on'); $('drawer').classList.remove('on'); }
+  var lsOpen = false;
+  function openList(){ lsOpen = true; $('mask').classList.add('on'); $('listDrawer').classList.add('on'); renderList(); }
+  function closeList(){ lsOpen = false; $('mask').classList.remove('on'); $('listDrawer').classList.remove('on'); }
 
-  function renderDrawer(){
-    var m = metaOf(S.book);
-    $('drTitle').textContent = m.name + ' 词表';
-    if(!BOOKS[S.book]){ $('drBody').innerHTML = '<p style="text-align:center;color:var(--ink-3);font-size:13px;padding:30px 0">词书加载中…</p>'; return; }
+  function renderList(){
+    $('drTitle').textContent = '词表 · 已选 ' + (S.plan||[]).length + ' 本';
+    if(!POOL){ $('drBody').innerHTML = '<p style="text-align:center;color:var(--ink-3);font-size:13px;padding:30px 0">词书加载中…</p>'; return; }
     var q = ($('drSearch').value || '').trim().toLowerCase();
-    var list = BOOKS[S.book].filter(function(o){
+    var list = POOL.filter(function(o){
       if(!q) return true;
       return o.w.toLowerCase().indexOf(q) >= 0 || (o.m||'').indexOf(q) >= 0;
     });
     var CAP = 300;
-    var shown = list.slice(0, CAP);
-    var html = shown.map(function(o){
+    var html = list.slice(0, CAP).map(function(o){
       var key = k(o.w);
       var st = S.mastered[key] ? 'learned' : (S.learned[key] ? (S.wrong[key] ? 'wrong' : 'learned') : '');
       var mk = S.mastered[key] ? '✓' : '☆';
@@ -637,7 +790,7 @@
         '<button class="mini '+(S.mastered[key]?'on':'')+'" data-master="'+esc(o.w)+'" title="标记已掌握">'+mk+'</button>' +
       '</div>';
     }).join('');
-    if(list.length > CAP) html += '<p style="text-align:center;color:var(--ink-3);font-size:12.5px;padding:14px 0">还有 '+(list.length-CAP)+' 个词，输入关键词可精确查找</p>';
+    if(list.length > CAP) html += '<p style="text-align:center;color:var(--ink-3);font-size:12.5px;padding:14px 0">还有 '+fmt(list.length-CAP)+' 个词，输入关键词可精确查找</p>';
     $('drBody').innerHTML = html || '<p style="text-align:center;color:var(--ink-3);font-size:13px;padding:30px 0">没有匹配的单词</p>';
 
     Array.prototype.forEach.call($('drBody').querySelectorAll('[data-say]'), function(b){
@@ -648,24 +801,35 @@
         var key = k(b.dataset.master);
         if(S.mastered[key]) delete S.mastered[key];
         else { S.mastered[key] = true; S.learned[key] = Date.now(); if(S.wrong[key]) delete S.wrong[key]; }
-        save(); renderDrawer(); render();
+        save(); renderList(); render();
       };
     });
   }
 
   /* ============ 事件 ============ */
-  $('mask').onclick = closeDrawer;
-  $('drClose').onclick = closeDrawer;
-  $('drReset').onclick = function(){ if(confirm('确定重置「'+metaOf(S.book).name+'」词书的学习进度？')) resetBook(); };
-  $('drSearch').oninput = renderDrawer;
+  $('mask').onclick = function(){ closeBooks(); closeList(); };
+  $('btnBooks').onclick = openBooks;
+  $('bkClose').onclick = closeBooks;
+  $('bkDone').onclick = closeBooks;
+  $('bkSearch').oninput = renderBookList;
+  $('bkClear').onclick = function(){
+    S.plan = []; S.today = null; POOL = null; clearRV(); save();
+    renderBookList(); render(); toast('已清空选择');
+  };
+  $('drClose').onclick = closeList;
+  $('drReset').onclick = function(){ if(confirm('确定重置全部学习进度？已学、已掌握、错词、收藏都会清空。')) resetAll(); };
+  $('drSearch').oninput = renderList;
 
   document.addEventListener('keydown', function(e){
-    if(drOpen){ if(e.key === 'Escape') closeDrawer(); return; }
+    if(bkOpen || lsOpen){
+      if(e.key === 'Escape'){ closeBooks(); closeList(); }
+      return;
+    }
     if(e.target && e.target.tagName === 'INPUT') return;
-    if(!BOOKS[S.book]) return;
+    if(!POOL || !(S.plan||[]).length) return;
     var c = cur();
     if(!c.ids.length || c.idx >= c.ids.length) return;
-    var o = INDEX[S.book+'::'+c.ids[c.idx]];
+    var o = wordObj(c.ids[c.idx]);
     var kk = (e.key || '').toLowerCase();
     if(e.code === 'Space' || e.key === 'Enter'){
       e.preventDefault();
