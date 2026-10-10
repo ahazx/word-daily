@@ -153,8 +153,15 @@
 
   /* ---------- footer ---------- */
   footer{ margin-top:20px; display:flex; gap:10px; flex-wrap:wrap; }
-  .chip{ background:#fff; border-radius:12px; padding:11px 15px; box-shadow:var(--shadow); font-size:12.5px; color:var(--ink-2); flex:1; min-width:104px; }
+  .chip{ background:#fff; border-radius:12px; padding:11px 15px; box-shadow:var(--shadow); font-size:12.5px; color:var(--ink-2); flex:1; min-width:104px; position:relative; }
   .chip b{ display:block; font-size:19px; color:var(--ink); margin-bottom:2px; font-weight:700; }
+  .chip.clickable{ cursor:pointer; transition:.16s; }
+  .chip.clickable:hover{ box-shadow:0 8px 22px rgba(79,70,229,.18); transform:translateY(-1px); }
+  .chip.clickable:active{ transform:translateY(0); }
+  .chip .arw{ position:absolute; right:11px; top:50%; transform:translateY(-50%); color:var(--ink-3); font-size:17px; line-height:1; }
+  .chip.clickable:hover .arw{ color:var(--brand); }
+  .chip.hint-on{ animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse{ 0%,100%{ box-shadow:var(--shadow); } 50%{ box-shadow:0 0 0 4px rgba(217,119,6,.14), var(--shadow); } }
 
   /* ---------- drawer ---------- */
   .mask{ position:fixed; inset:0; background:rgba(20,26,40,.42); backdrop-filter:blur(3px); display:none; z-index:40; }
@@ -242,9 +249,9 @@
 
   <footer>
     <div class="chip"><b id="sLearned">0</b>累计已学</div>
-    <div class="chip"><b id="sMastered">0</b>已掌握</div>
+    <div class="chip clickable" id="chipMastered" title="点击查看已掌握的词"><b id="sMastered">0</b>已掌握 <span class="arw">›</span></div>
     <div class="chip"><b id="sStreak">0</b>连续天数</div>
-    <div class="chip"><b id="sWrong">0</b>错词待复习</div>
+    <div class="chip clickable" id="chipWrong" title="点击查看错词明细"><b id="sWrong">0</b>错词待复习 <span class="arw">›</span></div>
   </footer>
 </div>
 
@@ -287,6 +294,17 @@
   </div>
 </aside>
 
+<!-- 错词 / 已掌握 明细 -->
+<aside class="drawer" id="wordDrawer">
+  <div class="dr-head">
+    <div class="t1"><span id="wdTitle">错词待复习</span><button class="x" id="wdClose">✕</button></div>
+    <input id="wdSearch" placeholder="搜索单词或中文释义…" autocomplete="off">
+    <div class="sel-info" id="wdInfo"></div>
+  </div>
+  <div class="dr-body" id="wdBody"></div>
+  <div class="dr-foot" id="wdFoot"></div>
+</aside>
+
 <div class="toast" id="toast"></div>
 
 <script src="books/meta.js"></script>
@@ -303,6 +321,7 @@
   var POOL_MAP = null;   // 小写单词 -> 词对象（O(1) 查找，池子可能十几万词）
   var POOL_ORDER = null; // 固定洗牌顺序
   var PLAN_KEY = '';
+  var GLOBAL_MAP = {};   // 所有已加载词书的单词索引（错词/已掌握明细要用，可能不在当前计划里）
 
   var CAT_ORDER = ['精选', '小学', '初中', '高中', '四级', '六级', '考研', '出国考试', '专四专八', '职场商务', '其他'];
 
@@ -378,6 +397,7 @@
       BOOKS[id] = raw.map(function(r){
         return { w:r[0], p:r[1]||'', t:r[2]||'', m:r[3]||'', e:r[4]||'', z:r[5]||'' };
       });
+      BOOKS[id].forEach(function(o){ GLOBAL_MAP[o.w.toLowerCase()] = o; });
       var q = LOADING[id] || []; delete LOADING[id];
       q.forEach(function(f){ try{ f(true); }catch(e){} });
     };
@@ -426,8 +446,8 @@
   function ensurePool(){ if(!POOL || PLAN_KEY !== planKeyOf()) rebuildPool(); return POOL; }
   function wordObj(w){
     var blank = { w:w, p:'', t:'', m:'', e:'', z:'' };
-    if(!POOL_MAP) return blank;
-    return POOL_MAP[String(w).toLowerCase()] || blank;
+    var lo = String(w).toLowerCase();
+    return (POOL_MAP && POOL_MAP[lo]) || GLOBAL_MAP[lo] || blank;
   }
 
   /* ============ 今日词 ============ */
@@ -938,8 +958,108 @@
     });
   }
 
+  /* ============ 错词 / 已掌握 明细抽屉 ============ */
+  var wdOpen = false, wdMode = 'wrong';
+  function openWords(mode){
+    wdMode = mode; wdOpen = true;
+    $('mask').classList.add('on'); $('wordDrawer').classList.add('on');
+    $('wdSearch').value = '';
+    renderWords();
+  }
+  function closeWords(){ wdOpen = false; $('mask').classList.remove('on'); $('wordDrawer').classList.remove('on'); }
+
+  function wordListOf(mode){
+    var src = (mode === 'wrong') ? S.wrong : S.mastered;
+    return Object.keys(src).filter(function(x){ return src[x]; }).sort();
+  }
+
+  function renderWords(){
+    var isWrong = (wdMode === 'wrong');
+    var words = wordListOf(wdMode);
+    $('wdTitle').textContent = isWrong ? '错词待复习' : '已掌握';
+    $('wdInfo').innerHTML = words.length
+      ? ('共 <b>' + words.length + '</b> 个单词' + (isWrong ? '，点右侧 ✓ 移出错词表' : '，点右侧 ✓ 取消掌握'))
+      : '';
+
+    var q = ($('wdSearch').value || '').trim().toLowerCase();
+    var list = words.filter(function(w){
+      if(!q) return true;
+      var o = wordObj(w);
+      return w.indexOf(q) >= 0 || (o.m || '').toLowerCase().indexOf(q) >= 0;
+    });
+
+    var CAP = 400;
+    var html = list.slice(0, CAP).map(function(w){
+      var o = wordObj(w);
+      var noInfo = !o.m;
+      return '<div class="li ' + (isWrong ? 'wrong' : 'learned') + '">' +
+        '<button class="mini" data-say="' + esc(o.w || w) + '">🔊</button>' +
+        '<span class="txt">' +
+          '<span class="w">' + esc(o.w || w) + (o.p ? '<span>' + esc(o.p) + '</span>' : '') + '</span>' +
+          '<span class="m">' + (noInfo
+              ? '<span style="color:var(--ink-3)">（该词书当前未加载，仅显示单词）</span>'
+              : esc((o.t ? o.t + ' ' : '') + o.m)) + '</span>' +
+        '</span>' +
+        '<button class="mini ' + (isWrong ? '' : 'on') + '" data-toggle="' + esc(w) + '" title="' +
+          (isWrong ? '标记为已掌握' : '取消掌握') + '">' + (isWrong ? '☆' : '✓') + '</button>' +
+      '</div>';
+    }).join('');
+    if(list.length > CAP) {
+      html += '<p style="text-align:center;color:var(--ink-3);font-size:12.5px;padding:14px 0">还有 ' +
+        fmt(list.length - CAP) + ' 个，输入关键词精确查找</p>';
+    }
+    $('wdBody').innerHTML = html || '<p style="text-align:center;color:var(--ink-3);font-size:13px;padding:36px 0">' +
+      (q ? '没有匹配的单词' : (isWrong ? '暂时没有错词，继续保持 👍' : '还没有标记已掌握的词')) + '</p>';
+
+    if(isWrong){
+      $('wdFoot').innerHTML = words.length
+        ? '<button class="btn ghost" id="wdClear" style="flex:0 0 auto">清空</button>' +
+          '<button class="btn primary" id="wdPractice" style="flex:1">🔁 练这些错词（' + Math.min(words.length, 20) + '）</button>'
+        : '';
+      var pc = $('wdClear');
+      if(pc) pc.onclick = function(){
+        if(!confirm('确定清空错词表？这些词会从待复习列表移除（不影响已学记录）。')) return;
+        S.wrong = {}; save(); renderWords(); render(); toast('错词表已清空');
+      };
+      var pp = $('wdPractice');
+      if(pp) pp.onclick = function(){
+        var batch = words.slice(0, 20);
+        closeWords();
+        RV = { ids: batch, idx:0, res:{}, kind:'review' };
+        render();
+        toast('开始复习 ' + batch.length + ' 个错词');
+      };
+    }else{
+      $('wdFoot').innerHTML = words.length
+        ? '<button class="btn ghost" id="wdUnmaster" style="flex:1">全部取消掌握</button>'
+        : '';
+      var um = $('wdUnmaster');
+      if(um) um.onclick = function(){
+        if(!confirm('确定取消全部「已掌握」标记？')) return;
+        S.mastered = {}; save(); renderWords(); render(); toast('已取消全部掌握标记');
+      };
+    }
+
+    Array.prototype.forEach.call($('wdBody').querySelectorAll('[data-say]'), function(b){
+      b.onclick = function(){ speak(b.dataset.say, 'en-US'); };
+    });
+    Array.prototype.forEach.call($('wdBody').querySelectorAll('[data-toggle]'), function(b){
+      b.onclick = function(){
+        var key = b.dataset.toggle;
+        if(isWrong){
+          delete S.wrong[key];
+          S.mastered[key] = true;
+          S.learned[key] = Date.now();
+        }else{
+          delete S.mastered[key];
+        }
+        save(); renderWords(); render(); renderList();
+      };
+    });
+  }
+
   /* ============ 事件 ============ */
-  $('mask').onclick = function(){ closeBooks(); closeList(); closeVoice(); };
+  $('mask').onclick = function(){ closeBooks(); closeList(); closeVoice(); closeWords(); };
   $('btnBooks').onclick = openBooks;
   $('bkClose').onclick = closeBooks;
   $('bkDone').onclick = closeBooks;
@@ -947,6 +1067,10 @@
   $('btnVoice').onclick = openVoice;
   $('vcClose').onclick = closeVoice;
   $('vcTest').onclick = function(){ speak('Hello, this is how I sound.', 'en-US'); };
+  $('chipWrong').onclick = function(){ openWords('wrong'); };
+  $('chipMastered').onclick = function(){ openWords('mastered'); };
+  $('wdClose').onclick = closeWords;
+  $('wdSearch').oninput = renderWords;
   $('bkClear').onclick = function(){
     S.plan = []; S.today = null; POOL = null; clearRV(); save();
     renderBookList(); render(); toast('已清空选择');
@@ -956,8 +1080,8 @@
   $('drSearch').oninput = renderList;
 
   document.addEventListener('keydown', function(e){
-    if(bkOpen || lsOpen || vcOpen){
-      if(e.key === 'Escape'){ closeBooks(); closeList(); closeVoice(); }
+    if(bkOpen || lsOpen || vcOpen || wdOpen){
+      if(e.key === 'Escape'){ closeBooks(); closeList(); closeVoice(); closeWords(); }
       return;
     }
     if(e.target && e.target.tagName === 'INPUT') return;
